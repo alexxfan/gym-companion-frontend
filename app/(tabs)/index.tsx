@@ -1,74 +1,378 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import { getPrograms, Program } from '@/lib/workoutService';
+import { getMealPlans, MealPlan } from '@/lib/mealplanService';
 
 export default function HomeScreen() {
+  const { isLoggedIn, user, isLoading } = useAuth();
+  const router = useRouter();
+  
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  useEffect(() => {
+    // Only redirect if not loading AND not logged in
+    if (!isLoading && !isLoggedIn) {
+      const timeout = setTimeout(() => {
+        router.replace('/(auth)/login');
+      }, 100);
+
+      return () => clearTimeout(timeout);
+    }
+    
+    // If logged in, fetch data
+    if (isLoggedIn) {
+      fetchUserData();
+    }
+  }, [isLoggedIn, isLoading]);
+  
+  const fetchUserData = async () => {
+    try {
+      setLoadingData(true);
+      
+      // Fetch recent programs
+      const programsData = await getPrograms();
+      setPrograms(programsData.slice(0, 3)); // Get only 3 most recent
+      
+      // Fetch recent meal plans
+      const mealPlansData = await getMealPlans();
+      setMealPlans(mealPlansData.slice(0, 3)); // Get only 3 most recent
+      
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#435465" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return null; // avoids flicker
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Welcome Section - now separate from header */}
+      <View style={styles.welcomeSection}>
+        <Text style={styles.welcomeText}>
+          Welcome back{user?.email ? `, ${user.email.split('@')[0]}!` : '!'}
+        </Text>
+        <Text style={styles.subtitle}>Track your fitness journey</Text>
+      </View>
+      
+      {/* Quick Actions */}
+      <View style={styles.quickActionsContainer}>
+        <TouchableOpacity 
+          style={[styles.quickAction, { backgroundColor: '#34788c' }]}
+          onPress={() => router.push('/programs/create')}
+        >
+          <MaterialIcons name="fitness-center" size={24} color="white" />
+          <Text style={styles.quickActionText}>New Workout</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.quickAction, { backgroundColor: '#179ea0' }]}
+          onPress={() => router.push('/meal-plans/create')}
+        >
+          <MaterialIcons name="restaurant" size={24} color="white" />
+          <Text style={styles.quickActionText}>New Meal Plan</Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* Workout Programs Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Your Workout Programs</Text>
+          <TouchableOpacity onPress={() => router.push('/programs')}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {loadingData ? (
+          <ActivityIndicator size="small" color="#34788c" style={{ marginVertical: 20 }} />
+        ) : programs.length > 0 ? (
+          programs.map(program => (
+            <TouchableOpacity 
+              key={program.program_id}
+              style={styles.programCard}
+              onPress={() => router.push(`/programs/${program.program_id}`)}
+            >
+              <View style={styles.programCardContent}>
+                <MaterialIcons name="fitness-center" size={24} color="#34788c" style={styles.cardIcon} />
+                <View>
+                  <Text style={styles.programName}>{program.program_name}</Text>
+                  <Text style={styles.programDate}>
+                    Created: {new Date(program.date).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No workout programs yet</Text>
+            <TouchableOpacity 
+              style={styles.createButton}
+              onPress={() => router.push('/programs/create')}
+            >
+              <Text style={styles.createButtonText}>Create One</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      
+      {/* Meal Plans Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Your Meal Plans</Text>
+          <TouchableOpacity onPress={() => router.push('/meal-plans')}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {loadingData ? (
+          <ActivityIndicator size="small" color="#179ea0" style={{ marginVertical: 20 }} />
+        ) : mealPlans.length > 0 ? (
+          mealPlans.map(plan => (
+            <TouchableOpacity 
+              key={plan.meal_plan_id}
+              style={styles.mealPlanCard}
+              onPress={() => router.push(`/meal-plans/${plan.meal_plan_id}`)}
+            >
+              <View style={styles.programCardContent}>
+                <MaterialIcons name="restaurant" size={24} color="#179ea0" style={styles.cardIcon} />
+                <View>
+                  <Text style={styles.programName}>{plan.meal_plan_name}</Text>
+                  <Text style={styles.programDate}>
+                    Created: {new Date(plan.date).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No meal plans yet</Text>
+            <TouchableOpacity 
+              style={[styles.createButton, { backgroundColor: '#179ea0' }]}
+              onPress={() => router.push('/meal-plans/create')}
+            >
+              <Text style={styles.createButtonText}>Create One</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      
+      {/* Tips Section */}
+      <View style={styles.tipsSection}>
+        <Text style={styles.tipsTitle}>Fitness Tips</Text>
+        <View style={styles.tipCard}>
+          <MaterialIcons name="lightbulb" size={24} color="#FFC107" style={styles.tipIcon} />
+          <Text style={styles.tipText}>
+            Stay hydrated! Aim to drink at least 8 glasses of water daily for optimal performance.
+          </Text>
+        </View>
+        <View style={styles.tipCard}>
+          <MaterialIcons name="lightbulb" size={24} color="#FFC107" style={styles.tipIcon} />
+          <Text style={styles.tipText}>
+            Consistent workouts are more effective than occasional intense sessions. Aim for regular exercise!
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+  },
+  contentContainer: {
+    paddingBottom: 30,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  welcomeSection: {
+    padding: 24,
+    paddingTop: 20,
+    marginTop: 15, // Gap from header
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#333',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  quickAction: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  quickActionText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  section: {
+    margin: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  seeAllText: {
+    color: '#435465',
+    fontWeight: '600',
+  },
+  programCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#f9f9f9',
+  },
+  mealPlanCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#f9f9f9',
+  },
+  programCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardIcon: {
+    marginRight: 12,
+  },
+  programName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  programDate: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 10,
+  },
+  createButton: {
+    backgroundColor: '#34788c',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  createButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  tipsSection: {
+    margin: 20,
+    marginTop: 10,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+    marginBottom: 30,
+  },
+  tipsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 15,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF9E5',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignItems: 'flex-start',
+  },
+  tipIcon: {
+    marginRight: 12,
+    marginTop: 2,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
   },
 });
