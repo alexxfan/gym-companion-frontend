@@ -1,31 +1,34 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { createProgram } from '@/lib/workoutService';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { createWorkout } from '@/lib/workoutService';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export default function CreateProgramScreen() {
-  const [programName, setProgramName] = useState('');
+export default function CreateWorkoutScreen() {
+  const params = useLocalSearchParams();
+  const programId = Number(params.program_id);
+  
+  const [workoutName, setWorkoutName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleCreate = async () => {
-    if (!programName.trim()) {
-      Alert.alert('Error', 'Please enter a program name');
+    if (!workoutName.trim()) {
+      Alert.alert('Error', 'Please enter a workout name');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log('📝 Creating new program:', programName);
-      const newProgram = await createProgram(programName);
-      console.log('Program created successfully, ID:', newProgram.program_id);
+      console.log(`📝 Creating new workout in program ${programId}:`, workoutName);
+      const newWorkout = await createWorkout(programId, workoutName);
+      console.log('Workout created successfully, ID:', newWorkout.workout_id);
       
-      //go back to programs page without showing an alert
-      router.replace('/programs');
+      //go to the workout detail page
+      router.replace(`/programs/${programId}/workouts/${newWorkout.workout_id}`);
     } catch (error) {
-      console.error('Create program error:', error);
-      Alert.alert('Error', 'Failed to create program. Please try again.');
+      console.error('Create workout error:', error);
+      Alert.alert('Error', 'Failed to create workout. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -40,28 +43,28 @@ export default function CreateProgramScreen() {
           <MaterialIcons name="fitness-center" size={60} color="#34788c" />
         </View>
         
-        <Text style={styles.title}>Create New Program</Text>
-        <Text style={styles.subtitle}>Get started with a new workout program</Text>
+        <Text style={styles.title}>Create New Workout</Text>
+        <Text style={styles.subtitle}>Add a workout to your program</Text>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Program Name</Text>
+          <Text style={styles.label}>Workout Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Summer Shred, Strength Training"
-            value={programName}
-            onChangeText={setProgramName}
+            placeholder="e.g., Chest Day, Leg Day, Full Body"
+            value={workoutName}
+            onChangeText={setWorkoutName}
             maxLength={50}
             editable={!isSubmitting}
           />
           
           <Text style={styles.helpText}>
-            Your program will contain workouts, and each workout will contain exercises.
+            Your workout will contain different exercises with sets, reps, and weights.
           </Text>
 
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#34788c" />
-              <Text style={styles.loadingText}>Creating program...</Text>
+              <Text style={styles.loadingText}>Creating workout...</Text>
             </View>
           ) : (
             <>
@@ -70,7 +73,7 @@ export default function CreateProgramScreen() {
                 onPress={handleCreate}
                 disabled={isSubmitting}
               >
-                <Text style={styles.buttonText}>Create Program</Text>
+                <Text style={styles.buttonText}>Create Workout</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -83,13 +86,13 @@ export default function CreateProgramScreen() {
             </>
           )}
         </View>
-
+        
         {/*Back*/}
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.replace('/programs')}
+          onPress={() => router.replace(`/programs/${programId}`)}
         >
-          <Text style={styles.backButtonText}>Back to Programs</Text>
+          <Text style={styles.backButtonText}>Back to Program</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

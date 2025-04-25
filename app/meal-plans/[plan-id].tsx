@@ -7,7 +7,7 @@ export default function MealPlanDetailScreen() {
   const params = useLocalSearchParams();
   const plan_id = params.plan_id || params['plan-id'] || '';
   
-  // Convert and validate planId safely - handle string, array, or other types
+  //convert and validate id
   const planId = typeof plan_id === 'string' 
     ? Number(plan_id.replace(/[^0-9]/g, '')) 
     : Array.isArray(plan_id) 
@@ -41,13 +41,13 @@ export default function MealPlanDetailScreen() {
       if (data && data.plan) {
         setPlan(data.plan);
         setMeals(data.meals || []);
-        console.log('✅ Meal plan loaded successfully:', data.plan.meal_plan_name);
+        console.log('Meal plan loaded successfully:', data.plan.meal_plan_name);
       } else {
         setError('Failed to load meal plan data');
-        console.error('❌ API returned empty data');
+        console.error('API returned empty data');
       }
     } catch (error) {
-      console.error('❌ Error loading meal plan:', error);
+      console.error('Error loading meal plan:', error);
       setError('Failed to load meal plan');
     } finally {
       setLoading(false);
@@ -56,15 +56,15 @@ export default function MealPlanDetailScreen() {
   
   const handleDeleteAction = async () => {
     try {
-      console.log('🗑️ Deleting meal plan with ID:', planId);
+      console.log('Deleting meal plan with ID:', planId);
       setIsDeleting(true);
       
       await deleteMealPlan(planId);
       
-      console.log('✅ Meal plan deleted successfully');
+      console.log('Meal plan deleted successfully');
       router.replace('/meal-plans');
     } catch (error) {
-      console.error('❌ Delete error:', error);
+      console.error('Delete error:', error);
       setIsDeleting(false);
       setShowConfirmDelete(false);
     }
@@ -120,7 +120,7 @@ export default function MealPlanDetailScreen() {
     );
   }
   
-  // Show confirmation UI instead of using Alert
+  //confirmation
   if (showConfirmDelete) {
     return (
       <View style={styles.container}>
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
-  // Confirmation dialog styles
   confirmBox: {
     backgroundColor: '#f8f9fa',
     padding: 24,

@@ -1,4 +1,3 @@
-// app/meal-plans/create.tsx
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -20,12 +19,12 @@ export default function CreateMealPlanScreen() {
     try {
       console.log('📝 Creating new meal plan:', planName);
       const newPlan = await createMealPlan(planName);
-      console.log('✅ Meal plan created successfully, ID:', newPlan.meal_plan_id);
+      console.log('Meal plan created successfully, ID:', newPlan.meal_plan_id);
       
-      // Navigate directly back to meal plans page
+      //navigate directly back to meal plans page
       router.replace('/meal-plans');
     } catch (error) {
-      console.error('❌ Create meal plan error:', error);
+      console.error('Create meal plan error:', error);
       Alert.alert('Error', 'Failed to create meal plan. Please try again.');
       setIsSubmitting(false);
     }
@@ -85,7 +84,7 @@ export default function CreateMealPlanScreen() {
           )}
         </View>
         
-        {/* Back Button */}
+        {/*Back*/}
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.replace('/meal-plans')}

@@ -1,4 +1,3 @@
-// app/auth/logout.tsx
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';

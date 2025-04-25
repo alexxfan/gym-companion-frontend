@@ -1,7 +1,7 @@
 // {
 //   "extends": "expo/tsconfig.base",
 //   "compilerOptions": {
-//     "jsx": "react-native", // ✅ REQUIRED
+//     "jsx": "react-native", // REQUIRED
 //     "strict": false,
 //     "target": "esnext",
 //     "module": "esnext",
@@ -47,6 +47,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ],
+, "app/programs/[program_id]/workouts/[workout_id]/exercises"  ],
   "extends": "expo/tsconfig.base"
 }

@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { useAuth } from '@/context/AuthContext';

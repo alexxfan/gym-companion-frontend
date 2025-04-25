@@ -1,13 +1,14 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store'; // assuming mobile
-import { getItem } from './storage'; // already exists in your code
+import { getItem } from './storage';
+import Constants from 'expo-constants';
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string
 const API = axios.create({
-//   baseURL: 'http://localhost:5000', // or wherever your backend lives
-    baseURL: 'http://192.168.1.242:5000', // Use your actual server URL
+  baseURL: API_BASE_URL, 
 });
 
-// Attach token on each request
+
+//attach token on each request
 API.interceptors.request.use(async (config) => {
     const token = await getItem('auth0_access_token');
     console.log('🔐 token', token);

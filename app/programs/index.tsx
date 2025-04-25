@@ -1,9 +1,9 @@
-// app/programs/index.tsx
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getPrograms } from '@/lib/workoutService';
 import { Program } from '@/lib/workoutService';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function ProgramListScreen() {
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -44,6 +44,15 @@ export default function ProgramListScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Your Workout Programs</Text>
+      
+      {/*AI*/}
+      <TouchableOpacity 
+        style={styles.aiButton}
+        onPress={() => router.push('/ai-generation/ai-programs')}
+      >
+        <MaterialIcons name="auto-awesome" size={22} color="#fff" />
+        <Text style={styles.aiButtonText}>Generate AI Workout Program</Text>
+      </TouchableOpacity>
       
       <FlatList
         data={programs}
@@ -100,6 +109,26 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     marginTop: 10,
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#435465',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  aiButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    marginLeft: 8,
   },
   card: {
     padding: 20,

@@ -22,23 +22,34 @@ type AuthContextType = {
   signOut: () => Promise<void>;
 };
 
-const auth0ClientId = 'sv0lXLuNn0xOY8CZeQ5VxfTVIqe4rVrR';
-const auth0Domain = 'dev-10hyxzgnigs4hncj.us.auth0.com';
-const audience = 'https://gym-companion-api';
+const auth0ClientId = process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID as string;
+const auth0Domain = process.env.EXPO_PUBLIC_AUTH0_DOMAIN as string;
+const audience = process.env.EXPO_PUBLIC_AUTH0_AUDIENCE as string;
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string;
 
-// Safe redirect URI generator for web + native + SSR
+
+
+
 const getRedirectUri = () => {
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/callback`;
     } else {
-      // return 'http://localhost:8081/callback';
-      return 'http://192.168.1.242:8081/callback';
+      return 'http://localhost:8081/callback';
     }
   } else {
+    //debugging
+    const standardUri = AuthSession.makeRedirectUri();
+    const withSchemeUri = AuthSession.makeRedirectUri({ scheme: 'myapp' });
+    const withPathUri = AuthSession.makeRedirectUri({ path: 'callback' });
+    const fullUri = AuthSession.makeRedirectUri({ scheme: 'myapp', path: 'callback' });
+    
+    console.log('Standard URI:', standardUri);
+    console.log('With scheme URI:', withSchemeUri);
+    console.log('With path URI:', withPathUri);
+    console.log('Full URI:', fullUri);
     return AuthSession.makeRedirectUri({
-      scheme: 'myapp',
-      path: 'callback',
+      path: 'callback'
     });
   }
 };
@@ -81,22 +92,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadUser();
   }, []);
 
-  const router = useRouter(); // <-- INIT THIS
+  const router = useRouter();
   const signIn = async () => {
     try {
       setIsLoading(true);
   
-      // const nonce = Math.random().toString(36).substring(2);
-      // const uri = redirectUri || 'myapp://callback';
-  
       const authRequest = new AuthSession.AuthRequest({
         clientId: auth0ClientId,
         redirectUri,
-        responseType: 'token id_token', // <- IMPORTANT FIX HERE
+        responseType: 'token id_token', 
         scopes: ['openid', 'profile', 'email'],
         extraParams: {
-          // audience: `https://${auth0Domain}/userinfo`, // <- specifically request access to userinfo
-          audience: 'https://gym-companion-api',
+          audience: audience,
           nonce: Math.random().toString(36).substring(2, 15)
         },
       });
@@ -121,8 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
         const auth0User = await userInfoResponse.json();
   
-        // const serverResponse = await axios.post('http://localhost:5000/auth/register-auth0-user', {
-        const serverResponse = await axios.post('http://192.168.1.242:5000/auth/register-auth0-user', {
+        const serverResponse = await axios.post(`${API_BASE_URL}/auth/register-auth0-user`, {
           auth0_id: auth0User.sub,
           email: auth0User.email,
         });

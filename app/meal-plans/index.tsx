@@ -1,8 +1,8 @@
-// app/meal-plans/index.tsx
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getMealPlans, MealPlan } from '@/lib/mealplanService';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function MealPlanListScreen() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
@@ -44,6 +44,15 @@ export default function MealPlanListScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Your Meal Plans</Text>
+      
+      {/*AI button*/}
+      <TouchableOpacity 
+        style={styles.aiButton}
+        onPress={() => router.push('/ai-generation/ai-meal-plans')}
+      >
+        <MaterialIcons name="auto-awesome" size={22} color="#fff" />
+        <Text style={styles.aiButtonText}>Generate AI Meal Plan</Text>
+      </TouchableOpacity>
       
       <FlatList
         data={mealPlans}
@@ -100,6 +109,26 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     marginTop: 10,
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#179ea0',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  aiButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    marginLeft: 8,
   },
   card: {
     padding: 20,

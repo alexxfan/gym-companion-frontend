@@ -1,31 +1,57 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { createProgram } from '@/lib/workoutService';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform, 
+  ScrollView, 
+  ActivityIndicator 
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { createExercise } from '@/lib/workoutService';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export default function CreateProgramScreen() {
-  const [programName, setProgramName] = useState('');
+export default function CreateExerciseScreen() {
+  const params = useLocalSearchParams();
+  const programId = Number(params.program_id);
+  const workoutId = Number(params.workout_id);
+  
+  const [exerciseName, setExerciseName] = useState('');
+  const [sets, setSets] = useState('');
+  const [reps, setReps] = useState('');
+  const [weight, setWeight] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleCreate = async () => {
-    if (!programName.trim()) {
-      Alert.alert('Error', 'Please enter a program name');
+    if (!exerciseName.trim()) {
+      Alert.alert('Error', 'Please enter an exercise name');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log('📝 Creating new program:', programName);
-      const newProgram = await createProgram(programName);
-      console.log('Program created successfully, ID:', newProgram.program_id);
+      //create exercise object
+      const exercise = {
+        exercise_name: exerciseName,
+        sets: sets ? parseInt(sets, 10) : 0,
+        reps: reps || '0',
+        weight: weight || '0'
+      };
       
-      //go back to programs page without showing an alert
-      router.replace('/programs');
+      console.log(`📝 Creating new exercise for workout ${workoutId}:`, exercise);
+      const newExercise = await createExercise(programId, workoutId, exercise);
+      console.log('Exercise created successfully, ID:', newExercise.exercise_id);
+      
+      //go back to workout detail page
+      router.replace(`/programs/${programId}/workouts/${workoutId}`);
     } catch (error) {
-      console.error('Create program error:', error);
-      Alert.alert('Error', 'Failed to create program. Please try again.');
+      console.error('Create exercise error:', error);
+      Alert.alert('Error', 'Failed to create exercise. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -40,28 +66,52 @@ export default function CreateProgramScreen() {
           <MaterialIcons name="fitness-center" size={60} color="#34788c" />
         </View>
         
-        <Text style={styles.title}>Create New Program</Text>
-        <Text style={styles.subtitle}>Get started with a new workout program</Text>
+        <Text style={styles.title}>Add New Exercise</Text>
+        <Text style={styles.subtitle}>Track your sets, reps, and weights</Text>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Program Name</Text>
+          <Text style={styles.label}>Exercise Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Summer Shred, Strength Training"
-            value={programName}
-            onChangeText={setProgramName}
+            placeholder="e.g., Bench Press, Squat, Deadlift"
+            value={exerciseName}
+            onChangeText={setExerciseName}
             maxLength={50}
             editable={!isSubmitting}
           />
           
-          <Text style={styles.helpText}>
-            Your program will contain workouts, and each workout will contain exercises.
-          </Text>
+          <Text style={styles.label}>Sets</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Number of sets (e.g., 3)"
+            value={sets}
+            onChangeText={setSets}
+            keyboardType="numeric"
+            editable={!isSubmitting}
+          />
+          
+          <Text style={styles.label}>Reps</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Number or range of reps (e.g., 10 or 8-12)"
+            value={reps}
+            onChangeText={setReps}
+            editable={!isSubmitting}
+          />
+          
+          <Text style={styles.label}>Weight</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Weight in kg/lbs or 'bodyweight'"
+            value={weight}
+            onChangeText={setWeight}
+            editable={!isSubmitting}
+          />
 
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#34788c" />
-              <Text style={styles.loadingText}>Creating program...</Text>
+              <Text style={styles.loadingText}>Adding exercise...</Text>
             </View>
           ) : (
             <>
@@ -70,7 +120,7 @@ export default function CreateProgramScreen() {
                 onPress={handleCreate}
                 disabled={isSubmitting}
               >
-                <Text style={styles.buttonText}>Create Program</Text>
+                <Text style={styles.buttonText}>Add Exercise</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -83,13 +133,13 @@ export default function CreateProgramScreen() {
             </>
           )}
         </View>
-
+        
         {/*Back*/}
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.replace('/programs')}
+          onPress={() => router.replace(`/programs/${programId}/workouts/${workoutId}`)}
         >
-          <Text style={styles.backButtonText}>Back to Programs</Text>
+          <Text style={styles.backButtonText}>Back to Workout</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -144,12 +194,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontSize: 16,
     backgroundColor: '#fff',
-  },
-  helpText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 24,
-    fontStyle: 'italic',
   },
   loadingContainer: {
     alignItems: 'center',

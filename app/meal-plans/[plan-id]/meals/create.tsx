@@ -1,31 +1,41 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { createProgram } from '@/lib/workoutService';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { createMeal } from '@/lib/mealplanService';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export default function CreateProgramScreen() {
-  const [programName, setProgramName] = useState('');
+export default function CreateMealScreen() {
+  const params = useLocalSearchParams();
+  const plan_id = params['plan-id'] || '';
+  
+  //convert and validate planId
+  const planId = typeof plan_id === 'string' 
+    ? Number(plan_id.replace(/[^0-9]/g, '')) 
+    : Array.isArray(plan_id) 
+      ? Number(plan_id[0]) 
+      : 0;
+
+  const [mealType, setMealType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleCreate = async () => {
-    if (!programName.trim()) {
-      Alert.alert('Error', 'Please enter a program name');
+    if (!mealType.trim()) {
+      Alert.alert('Error', 'Please enter a meal type');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log('📝 Creating new program:', programName);
-      const newProgram = await createProgram(programName);
-      console.log('Program created successfully, ID:', newProgram.program_id);
+      console.log(`📝 Creating new meal in plan ${planId}:`, mealType);
+      const newMeal = await createMeal(planId, mealType);
+      console.log('Meal created successfully, ID:', newMeal.meal_id);
       
-      //go back to programs page without showing an alert
-      router.replace('/programs');
+      //go back to meal plan detail page
+      router.replace(`/meal-plans/${planId}`);
     } catch (error) {
-      console.error('Create program error:', error);
-      Alert.alert('Error', 'Failed to create program. Please try again.');
+      console.error('Create meal error:', error);
+      Alert.alert('Error', 'Failed to create meal. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -37,31 +47,31 @@ export default function CreateProgramScreen() {
     >
       <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.iconContainer}>
-          <MaterialIcons name="fitness-center" size={60} color="#34788c" />
+          <MaterialIcons name="restaurant" size={60} color="#179ea0" />
         </View>
         
-        <Text style={styles.title}>Create New Program</Text>
-        <Text style={styles.subtitle}>Get started with a new workout program</Text>
+        <Text style={styles.title}>Add New Meal</Text>
+        <Text style={styles.subtitle}>Create a meal for your plan</Text>
 
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Program Name</Text>
+          <Text style={styles.label}>Meal Type</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Summer Shred, Strength Training"
-            value={programName}
-            onChangeText={setProgramName}
+            placeholder="e.g., Breakfast, Lunch, Dinner, Snack"
+            value={mealType}
+            onChangeText={setMealType}
             maxLength={50}
             editable={!isSubmitting}
           />
           
           <Text style={styles.helpText}>
-            Your program will contain workouts, and each workout will contain exercises.
+            You can add specific food items to this meal after creating it.
           </Text>
 
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#34788c" />
-              <Text style={styles.loadingText}>Creating program...</Text>
+              <ActivityIndicator size="large" color="#179ea0" />
+              <Text style={styles.loadingText}>Creating meal...</Text>
             </View>
           ) : (
             <>
@@ -70,7 +80,7 @@ export default function CreateProgramScreen() {
                 onPress={handleCreate}
                 disabled={isSubmitting}
               >
-                <Text style={styles.buttonText}>Create Program</Text>
+                <Text style={styles.buttonText}>Create Meal</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -83,13 +93,13 @@ export default function CreateProgramScreen() {
             </>
           )}
         </View>
-
+        
         {/*Back*/}
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.replace('/programs')}
+          onPress={() => router.replace(`/meal-plans/${planId}`)}
         >
-          <Text style={styles.backButtonText}>Back to Programs</Text>
+          <Text style={styles.backButtonText}>Back to Meal Plan</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -158,10 +168,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#34788c',
+    color: '#179ea0',
   },
   button: {
-    backgroundColor: '#34788c',
+    backgroundColor: '#179ea0',
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
@@ -188,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backButtonText: {
-    color: '#34788c',
+    color: '#179ea0',
     fontWeight: '600',
   },
 });

@@ -1,9 +1,8 @@
-// lib/workoutService.ts
 import API from './api';
 import { getItem } from './storage';
 import axios from 'axios';
 
-// Program types
+//program types
 export interface Program {
   program_id: number;
   user_id: number;
@@ -26,7 +25,6 @@ export interface Exercise {
   weight: string | number;
 }
 
-// Programs
 export const getPrograms = async (): Promise<Program[]> => {
   const response = await API.get('/api/gym/programs');
   return response.data;
@@ -46,21 +44,19 @@ export const deleteProgram = async (programId: number) => {
     try {
       console.log('📡 Deleting program with ID:', programId);
       
-      // Make sure we're using the DELETE method with the correct URL
       const response = await API.delete(`/api/gym/programs/${programId}`);
       
-      console.log('✅ Delete response status:', response.status);
-      console.log('✅ Delete response data:', response.data);
+      console.log('Delete response status:', response.status);
+      console.log('Delete response data:', response.data);
       
       return response.data;
     } catch (err) {
-      console.error('❌ Delete request failed:', err);
-      throw err; // Re-throw to be caught by the component
+      console.error('Delete request failed:', err);
+      throw err; 
     }
   };
   
 
-// Workouts
 export const getWorkouts = async (programId: number): Promise<Workout[]> => {
   const response = await API.get(`/api/gym/programs/${programId}/workouts`);
   return response.data;
@@ -80,7 +76,6 @@ export const deleteWorkout = async (programId: number, workoutId: number): Promi
   await API.delete(`/api/gym/programs/${programId}/workouts/${workoutId}`);
 };
 
-// Exercises
 export const getExercises = async (programId: number, workoutId: number): Promise<Exercise[]> => {
   const response = await API.get(`/api/gym/programs/${programId}/workouts/${workoutId}/exercises`);
   return response.data;

@@ -1,4 +1,3 @@
-// lib/storage.ts
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
@@ -18,7 +17,6 @@ export const getItem = async (key: string): Promise<string | null> => {
     }
     return await SecureStore.getItemAsync(key);
   };
-  
 
 export const deleteItem = async (key: string) => {
   if (isWeb) {

@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { getPrograms, Program } from '@/lib/workoutService';
 import { getMealPlans, MealPlan } from '@/lib/mealplanService';
+import { getSessionHistory, SessionSummary } from '@/lib/sessionService'; // make sure this exists
+
+
 
 export default function HomeScreen() {
   const { isLoggedIn, user, isLoading } = useAuth();
@@ -12,10 +15,11 @@ export default function HomeScreen() {
   
   const [programs, setPrograms] = useState<Program[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    // Only redirect if not loading AND not logged in
+    //only redirect if not loading AND not logged in
     if (!isLoading && !isLoggedIn) {
       const timeout = setTimeout(() => {
         router.replace('/(auth)/login');
@@ -23,8 +27,7 @@ export default function HomeScreen() {
 
       return () => clearTimeout(timeout);
     }
-    
-    // If logged in, fetch data
+    //if logged in, get data
     if (isLoggedIn) {
       fetchUserData();
     }
@@ -34,13 +37,18 @@ export default function HomeScreen() {
     try {
       setLoadingData(true);
       
-      // Fetch recent programs
+      //get recent programs
       const programsData = await getPrograms();
-      setPrograms(programsData.slice(0, 3)); // Get only 3 most recent
+      setPrograms(programsData.slice(0, 3));
       
-      // Fetch recent meal plans
+      //get recent meal plans
       const mealPlansData = await getMealPlans();
-      setMealPlans(mealPlansData.slice(0, 3)); // Get only 3 most recent
+      setMealPlans(mealPlansData.slice(0, 3));
+
+      //get recent sessions
+      const sessionData = await getSessionHistory();
+      setSessions(sessionData.slice(0, 3));
+
       
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -59,12 +67,12 @@ export default function HomeScreen() {
   }
 
   if (!isLoggedIn) {
-    return null; // avoids flicker
+    return null; 
   }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Welcome Section - now separate from header */}
+      {/*Welcome*/}
       <View style={styles.welcomeSection}>
         <Text style={styles.welcomeText}>
           Welcome back{user?.email ? `, ${user.email.split('@')[0]}!` : '!'}
@@ -72,7 +80,21 @@ export default function HomeScreen() {
         <Text style={styles.subtitle}>Track your fitness journey</Text>
       </View>
       
-      {/* Quick Actions */}
+      {/*AI*/}
+      <TouchableOpacity 
+        style={styles.aiAssistantContainer}
+        onPress={() => router.push('/ai-generation')}
+      >
+        <View style={styles.aiAssistantContent}>
+          <MaterialIcons name="auto-awesome" size={36} color="#fff" style={styles.aiIcon} />
+          <View style={styles.aiTextContainer}>
+            <Text style={styles.aiTitle}>AI Training Assistant</Text>
+            <Text style={styles.aiDescription}>Create personalized workout & meal plans</Text>
+          </View>
+        </View>
+        <MaterialIcons name="chevron-right" size={28} color="#fff" />
+      </TouchableOpacity>
+      
       <View style={styles.quickActionsContainer}>
         <TouchableOpacity 
           style={[styles.quickAction, { backgroundColor: '#34788c' }]}
@@ -91,7 +113,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
       
-      {/* Workout Programs Section */}
+      {/*Programs*/}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Your Workout Programs</Text>
@@ -133,8 +155,51 @@ export default function HomeScreen() {
           </View>
         )}
       </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Sessions</Text>
+          <TouchableOpacity onPress={() => router.push('/sessions/history')}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
+        </View>
+
+        {loadingData ? (
+          <ActivityIndicator size="small" color="#34788c" style={{ marginVertical: 20 }} />
+        ) : sessions.length > 0 ? (
+          sessions.map(session => (
+            <TouchableOpacity
+              key={session.session_id}
+              style={styles.programCard}
+              onPress={() => router.push(`/sessions/${session.session_id}`)}
+            >
+              <View style={styles.programCardContent}>
+                <MaterialIcons name="history" size={24} color="#34788c" style={styles.cardIcon} />
+                <View>
+                  <Text style={styles.programName}>{session.workout_name}</Text>
+                  <Text style={styles.programDate}>
+                    {new Date(session.date).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No sessions yet</Text>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => router.push('/programs')}
+            >
+              <Text style={styles.createButtonText}>Start a Workout</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
       
-      {/* Meal Plans Section */}
+      {/*Meal Plans*/}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Your Meal Plans</Text>
@@ -177,13 +242,13 @@ export default function HomeScreen() {
         )}
       </View>
       
-      {/* Tips Section */}
+      {/*Tips (filler)*/}
       <View style={styles.tipsSection}>
         <Text style={styles.tipsTitle}>Fitness Tips</Text>
         <View style={styles.tipCard}>
           <MaterialIcons name="lightbulb" size={24} color="#FFC107" style={styles.tipIcon} />
           <Text style={styles.tipText}>
-            Stay hydrated! Aim to drink at least 8 glasses of water daily for optimal performance.
+            Stay hydrated! Aim to consume at least 2 litres of water a day.
           </Text>
         </View>
         <View style={styles.tipCard}>
@@ -214,7 +279,7 @@ const styles = StyleSheet.create({
   welcomeSection: {
     padding: 24,
     paddingTop: 20,
-    marginTop: 15, // Gap from header
+    marginTop: 15,
     alignItems: 'center',
   },
   welcomeText: {
@@ -228,6 +293,41 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 8,
     textAlign: 'center',
+  },
+  aiAssistantContainer: {
+    margin: 20,
+    marginTop: 0,
+    marginBottom: 15,
+    backgroundColor: '#435465',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  aiAssistantContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiIcon: {
+    marginRight: 12,
+  },
+  aiTextContainer: {
+    flexDirection: 'column',
+  },
+  aiTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  aiDescription: {
+    fontSize: 14,
+    color: '#e0e0e0',
   },
   quickActionsContainer: {
     flexDirection: 'row',
@@ -305,6 +405,8 @@ const styles = StyleSheet.create({
   programCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    // overflow: 'hidden', 
   },
   cardIcon: {
     marginRight: 12,

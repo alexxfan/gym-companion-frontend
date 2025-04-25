@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 
 export default function Callback() {
   const { isLoggedIn, isLoading } = useAuth();
@@ -9,19 +9,36 @@ export default function Callback() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!isLoading && isLoggedIn) {
-        router.replace('/(tabs)');
-      } else {
-        router.replace('/login'); // fallback if not logged in
+      if (!isLoading) {
+        if (isLoggedIn) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/login');
+        }
       }
-    }, 300);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, [isLoggedIn, isLoading]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.container}>
       <ActivityIndicator size="large" color="#435465" />
+      <Text style={styles.text}>Completing authentication...</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: '#fff'
+  },
+  text: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#666'
+  }
+});

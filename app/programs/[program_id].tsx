@@ -6,7 +6,7 @@ import { getProgramById, deleteProgram, Program, Workout } from '@/lib/workoutSe
 export default function ProgramDetailScreen() {
   const { program_id } = useLocalSearchParams();
   
-  // Convert and validate programId safely
+  //convert andd validate programId safely
   const programId = Number(program_id);
   const isValidId = !isNaN(programId) && Number.isInteger(programId) && programId > 0;
   
@@ -30,9 +30,9 @@ export default function ProgramDetailScreen() {
       const data = await getProgramById(programId);
       setProgram(data.program);
       setWorkouts(data.workouts);
-      console.log('✅ Program details loaded successfully');
+      console.log('Program details loaded successfully');
     } catch (error) {
-      console.error('❌ Error loading program:', error);
+      console.error('Error loading program:', error);
       setLoading(false);
     } finally {
       setLoading(false);
@@ -41,16 +41,16 @@ export default function ProgramDetailScreen() {
   
   const handleDeleteAction = async () => {
     try {
-      console.log('🗑️ Directly deleting program with ID:', programId);
+      console.log('Directly deleting program with ID:', programId);
       setIsDeleting(true);
       
-      // Call the API
+      //call API
       await deleteProgram(programId);
       
-      console.log('✅ Program deleted successfully, navigating away');
+      console.log('Program deleted successfully, navigating away');
       router.replace('/programs');
     } catch (error) {
-      console.error('❌ Delete error:', error);
+      console.error('Delete error:', error);
       setIsDeleting(false);
       setShowConfirmDelete(false);
     }
@@ -83,7 +83,7 @@ export default function ProgramDetailScreen() {
   
   if (!program) return <Text>Program not found.</Text>;
   
-  // Show confirmation UI instead of using Alert
+  //show confirmation
   if (showConfirmDelete) {
     return (
       <View style={styles.container}>
@@ -138,7 +138,7 @@ export default function ProgramDetailScreen() {
   
       <TouchableOpacity 
         style={styles.addButton}
-        onPress={() => router.push(`/programs/${programId}/workouts`)}
+        onPress={() => router.push(`/programs/${programId}/workouts/create`)}
       >
         <Text style={styles.addButtonText}>Add Workout</Text>
       </TouchableOpacity>
