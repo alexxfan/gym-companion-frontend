@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
       const returnTo = Platform.OS === 'web'
         ? 'http://localhost:8081/login'
-        : 'http://192.168.1.242:8081/login';
+        : 'myapp://login';
   
       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
 
