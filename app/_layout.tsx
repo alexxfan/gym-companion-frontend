@@ -7,10 +7,12 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { Button, Platform, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { AuthProvider } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 SplashScreen.preventAutoHideAsync();
+
 
 //header buttons
 interface HeaderButtonProps {
@@ -21,7 +23,8 @@ interface HeaderButtonProps {
 
 const HeaderButton = ({ title, onPress, color = "#fff" }: HeaderButtonProps) => (
   <TouchableOpacity 
-    onPress={onPress}
+    // there is a bug with expo that you need to use onPressIn instead of onPress in the
+    onPressIn={onPress}
     style={styles.headerButton}
   >
     <Text style={[styles.headerButtonText, { color }]}>{title}</Text>
@@ -30,6 +33,8 @@ const HeaderButton = ({ title, onPress, color = "#fff" }: HeaderButtonProps) => 
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { isLoggedIn, signOut } = useAuth(); // Destructure isLoggedIn
+
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -53,14 +58,16 @@ export default function RootLayout() {
               backgroundColor: '#435465',
               height: Platform.OS === 'ios' ? 110 : 65, 
             },
+            
             headerTintColor: '#fff',
             headerTitleStyle: {
               fontWeight: 'bold',
               fontSize: 20,
             },
             headerTitleAlign: 'center',
+            headerShown: route.name !== '(auth)/login',
             title: 'Gym Companion',
-            headerLeft: route.name !== '(tabs)' ? () => (
+            headerLeft: route.name !== '(tabs)/index' && route.name !== '(auth)/login' ? () => (
               <HeaderButton 
                 title="HOME" 
                 onPress={() => router.replace('/(tabs)')} 
@@ -69,7 +76,12 @@ export default function RootLayout() {
             headerRight: () => (
               <HeaderButton
                 title="LOGOUT"
-                onPress={() => router.replace('/(auth)/logout')}
+              onPress={() => {
+                console.log("LOGOUT button pressed");
+                //direct signOut call instead of navigation
+                signOut().then(() => { router.replace('/(auth)/logout') });
+              }}
+                // onPress={() => router.replace('/(auth)/logout')}
               />
             ),
             headerLeftContainerStyle: {
@@ -82,8 +94,9 @@ export default function RootLayout() {
           })}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)/login" />
-          <Stack.Screen name="(auth)/signup" />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)/logout" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

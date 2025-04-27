@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { getItem } from './storage';
-import Constants from 'expo-constants';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string
 const API = axios.create({

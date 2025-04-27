@@ -27,9 +27,6 @@ const auth0Domain = process.env.EXPO_PUBLIC_AUTH0_DOMAIN as string;
 const audience = process.env.EXPO_PUBLIC_AUTH0_AUDIENCE as string;
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string;
 
-
-
-
 const getRedirectUri = () => {
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined') {
@@ -38,21 +35,16 @@ const getRedirectUri = () => {
       return 'http://localhost:8081/callback';
     }
   } else {
-    //debugging
     const standardUri = AuthSession.makeRedirectUri();
-    const withSchemeUri = AuthSession.makeRedirectUri({ scheme: 'myapp' });
-    const withPathUri = AuthSession.makeRedirectUri({ path: 'callback' });
-    const fullUri = AuthSession.makeRedirectUri({ scheme: 'myapp', path: 'callback' });
-    
-    console.log('Standard URI:', standardUri);
-    console.log('With scheme URI:', withSchemeUri);
-    console.log('With path URI:', withPathUri);
-    console.log('Full URI:', fullUri);
-    return AuthSession.makeRedirectUri({
-      path: 'callback'
-    });
+    console.log('Using redirect URI:', standardUri);
+    console.log("Auth0 Client ID:", auth0ClientId);
+    console.log("Auth0 Domain:", auth0Domain);
+    console.log("Auth0 Audience:", audience);
+
+    return standardUri;
   }
 };
+
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
@@ -157,36 +149,129 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
+  // const signOut = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     await deleteItem('auth0_id_token');
+  //     await deleteItem('auth0_access_token');
+  //     await deleteItem('user_data');
   
-      await deleteItem('auth0_id_token');
-      await deleteItem('auth0_access_token');
-      await deleteItem('user_data');
+  //     const returnTo = Platform.OS === 'web'
+  //       ? 'http://localhost:8081/login'
+  //       : 'myapp://login';
   
-      const returnTo = Platform.OS === 'web'
-        ? 'http://localhost:8081/login'
-        : 'myapp://login';
-  
-      const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
+  //     const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
 
   
-      if (Platform.OS === 'web') {
-        // 🚀 Just send user directly to Auth0 logout
-        window.location.href = logoutUrl;
-      } else {
-        await WebBrowser.openAuthSessionAsync(logoutUrl, returnTo);
-      }
+  //     if (Platform.OS === 'web') {
+  //       // Send user directly to Auth0 logout
+  //       window.location.href = logoutUrl;
+  //     } else {
+  //       console.log('we are int he else lol')
+  //       router.replace('/(auth)/login');
+  //     }
   
-      setUser(null);
-      setIsLoggedIn(false);
-    } catch (err) {
-      console.error('[Auth] Sign-out error:', err);
-    } finally {
-      setIsLoading(false);
+  //     setUser(null);
+  //     setIsLoggedIn(false);
+
+  //   } catch (err) {
+  //     console.error('[Auth] Sign-out error:', err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+// const signOut = async () => {
+//   try {
+//     console.log('Starting signOut process');
+//     setIsLoading(true);
+
+//     // Set a logout flag
+//     await saveItem('manually_logged_out', 'true');
+    
+//     // Then clear the stored tokens
+//     await Promise.all([
+//       deleteItem('auth0_id_token'),
+//       deleteItem('auth0_access_token'),
+//       deleteItem('user_data')
+//     ]);
+    
+//     // For web, we need to log out of Auth0
+//     if (Platform.OS === 'web') {
+//       const returnTo = window.location.origin + '/login';
+//       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
+//       window.location.href = logoutUrl;
+//     } else {
+//       // For mobile, log out of Auth0 session and then navigate
+//       const returnTo = 'exp://ilredko-alexfan-8081.exp.direct/--/login';
+//       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
+      
+//       try {
+//         // Clear the Auth0 session in the browser
+//         await WebBrowser.openAuthSessionAsync(logoutUrl, returnTo);
+//         WebBrowser.maybeCompleteAuthSession();
+//         router.replace('/(auth)/login');
+//       } catch (browserErr) {
+//         console.log('Browser session error:', browserErr);
+//       }
+      
+//     setUser(null);
+//     setIsLoggedIn(false);
+
+//     }
+//   } catch (err) {
+//     console.error('[Auth] Sign-out error:', err);
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
+const signOut = async () => {
+  try {
+    console.log('Starting signOut process');
+    setIsLoading(true);
+
+    //clear tokens
+    await Promise.all([
+      deleteItem('auth0_id_token'),
+      deleteItem('auth0_access_token'),
+      deleteItem('user_data')
+    ]);
+
+    //log out from Auth0
+    const returnTo = Platform.OS === 'web'
+      ? window.location.origin + '/login'  // Web redirect
+      : 'myapp://login';  // Mobile redirect to a deep link in your app
+
+    const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
+
+    //open the Auth session to log out on moble
+    if (Platform.OS !== 'web') {
+      await WebBrowser.openAuthSessionAsync(logoutUrl, returnTo);
+
+      //ensure that any session is cleared
+      WebBrowser.maybeCompleteAuthSession();
+
+      //go back to the login screen after the session completes
+      setTimeout(() => {
+        router.replace('/(auth)/login');  
+      }, 1000);
     }
-  };
+
+    //redirect
+    if (Platform.OS === 'web') {
+      window.location.href = logoutUrl;
+    }
+
+    //set user data to null and loggedIn to false
+    setUser(null);
+    setIsLoggedIn(false);
+  } catch (err) {
+    console.error('[Auth] Sign-out error:', err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, isLoading, signIn, signOut }}>

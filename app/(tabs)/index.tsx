@@ -10,7 +10,7 @@ import { getSessionHistory, SessionSummary } from '@/lib/sessionService'; // mak
 
 
 export default function HomeScreen() {
-  const { isLoggedIn, user, isLoading } = useAuth();
+  const { isLoggedIn, user, isLoading} = useAuth();
   const router = useRouter();
   
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -328,6 +328,7 @@ const styles = StyleSheet.create({
   aiDescription: {
     fontSize: 14,
     color: '#e0e0e0',
+    flex: 1,
   },
   quickActionsContainer: {
     flexDirection: 'row',

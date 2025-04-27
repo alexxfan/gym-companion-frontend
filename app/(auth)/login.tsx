@@ -9,7 +9,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('[Login] isLoggedIn:', isLoggedIn, 'isLoading:', isLoading);
+    // console.log('[Login] isLoggedIn:', isLoggedIn, 'isLoading:', isLoading);
     if (!isLoading && isLoggedIn) {
       router.replace('/(tabs)');
     }
