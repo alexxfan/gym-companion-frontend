@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import API from '@/lib/api';
 import { MaterialIcons } from '@expo/vector-icons';
 import EditableValue from '@/components/EditableValue';
+import { Platform } from 'react-native';
 
 
 interface ExerciseLog {
@@ -332,26 +333,37 @@ export default function SessionDetailScreen() {
       ))}
 
       
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.finishButton}
         onPress={() => {
           if (progressPercentage === 100) {
             router.replace('/sessions/history');
           } else {
-            Alert.alert(
-              'Session Incomplete',
-              'You still have exercises to complete. Are you sure you want to finish this session?',
-              [
-                {
-                  text: 'Cancel',
-                  style: 'cancel',
-                },
-                {
-                  text: 'Finish Anyway',
-                  onPress: () => router.replace('/sessions/history'),
-                },
-              ]
-            );
+            if (Platform.OS === 'web') {
+              //web
+              const confirmFinish = window.confirm(
+                'You still have exercises to complete. Are you sure you want to finish this session?'
+              );
+              if (confirmFinish) {
+                router.replace('/sessions/history');
+              }
+            } else {
+              //mobile
+              Alert.alert(
+                'Session Incomplete',
+                'You still have exercises to complete. Are you sure you want to finish this session?',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Finish Anyway',
+                    onPress: () => router.replace('/sessions/history'),
+                  },
+                ]
+              );
+            }
           }
         }}
       >
@@ -359,8 +371,8 @@ export default function SessionDetailScreen() {
           {progressPercentage === 100 ? 'Complete Workout' : 'Finish Workout'}
         </Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.backButton}
         onPress={() => router.replace('/sessions/history')}
       >

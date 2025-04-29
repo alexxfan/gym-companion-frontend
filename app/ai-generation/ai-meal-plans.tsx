@@ -33,7 +33,6 @@ interface MealPlanRequest {
 export default function AIMealGenerator() {
     const router = useRouter();
     const [isGenerating, setIsGenerating] = useState(false);
-
     const [height, setHeight] = useState('');
     const [weight, setWeight] = useState('');
     const [age, setAge] = useState('');
@@ -46,22 +45,38 @@ export default function AIMealGenerator() {
     const [calorieTarget, setCalorieTarget] = useState('');
 
     const validateForm = () => {
+        let errorMessage = '';
+        
         if (!height || !weight || !age || !gender || !fitnessGoals || !mealsPerDay) {
-            Alert.alert('Missing Information', 'Please fill in all required fields.');
+            errorMessage = 'Please fill in all required fields.';
+        } else if (isNaN(Number(height)) || isNaN(Number(weight)) || isNaN(Number(age)) || isNaN(Number(mealsPerDay))) {
+            errorMessage = 'Height, weight, age, and meals per day must be numbers.';
+        } else if (customCalories && (isNaN(Number(calorieTarget)) || Number(calorieTarget) <= 0)) {
+            errorMessage = 'Please enter a valid calorie target or disable custom calories.';
+        }
+        
+        if (errorMessage) {
+            if (Platform.OS === 'web') {
+                //web
+                window.alert('Missing Information: ' + errorMessage);
+            } else {
+                //mobile
+                Alert.alert('Missing Information', errorMessage);
+            }
             return false;
         }
-
-        if (isNaN(Number(height)) || isNaN(Number(weight)) || isNaN(Number(age)) || isNaN(Number(mealsPerDay))) {
-            Alert.alert('Invalid Input', 'Height, weight, age, and meals per day must be numbers.');
-            return false;
-        }
-
-        if (customCalories && (isNaN(Number(calorieTarget)) || Number(calorieTarget) <= 0)) {
-            Alert.alert('Invalid Calorie Target', 'Please enter a valid calorie target or disable custom calories.');
-            return false;
-        }
-
         return true;
+    };
+
+    //web specific
+    const navigateToMealPlan = (planId: string | number) => {
+        if (Platform.OS === 'web') {
+            // For web, immediately redirect
+            window.location.href = `/meal-plans/${planId}`;
+        } else {
+            // For mobile, use the router
+            router.push(`/meal-plans/${planId}`);
+        }
     };
 
     //form submission
@@ -102,16 +117,22 @@ export default function AIMealGenerator() {
 
             //check if plan was generated and saved successfully
             if (response.data && response.data.meal_plan_id) {
-                Alert.alert(
-                    'Success!',
-                    `Your meal plan "${response.data.meal_plan_name}" has been generated.`,
-                    [
-                        {
-                            text: 'View Plan',
-                            onPress: () => router.push(`/meal-plans/${response.data.meal_plan_id}`)
-                        }
-                    ]
-                );
+                if (Platform.OS === 'web') {
+                    // On web, redirect immediately
+                    navigateToMealPlan(response.data.meal_plan_id);
+                } else {
+                    // On mobile, show alert with navigation option
+                    Alert.alert(
+                        'Success!',
+                        `Your meal plan "${response.data.meal_plan_name}" has been generated.`,
+                        [
+                            {
+                                text: 'View Plan',
+                                onPress: () => navigateToMealPlan(response.data.meal_plan_id)
+                            }
+                        ]
+                    );
+                }
             } else if (response.data && response.data.rawResponse) {
                 Alert.alert(
                     'Plan Generated but Not Saved',

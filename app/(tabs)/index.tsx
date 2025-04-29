@@ -51,7 +51,7 @@ export default function HomeScreen() {
 
       
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      // console.error('Error fetching user data:', error);
     } finally {
       setLoadingData(false);
     }
@@ -309,16 +309,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    // flex: 1,
+    // overflow: 'hidden',
   },
   aiAssistantContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    overflow: 'hidden',
   },
   aiIcon: {
     marginRight: 12,
+    // flex: 1,
+    // overflow: 'hidden',
   },
   aiTextContainer: {
     flexDirection: 'column',
+    flex: 1,
+    overflow: 'hidden',
   },
   aiTitle: {
     fontSize: 18,
@@ -407,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    // overflow: 'hidden', 
+    overflow: 'hidden', 
   },
   cardIcon: {
     marginRight: 12,
@@ -416,6 +424,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    flex: 1,
   },
   programDate: {
     fontSize: 12,

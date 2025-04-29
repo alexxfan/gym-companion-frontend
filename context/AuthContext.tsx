@@ -29,18 +29,13 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string;
 
 const getRedirectUri = () => {
   if (Platform.OS === 'web') {
-    if (typeof window !== 'undefined') {
-      return `${window.location.origin}/callback`;
-    } else {
-      return 'http://localhost:8081/callback';
-    }
+    return `${window.location.origin}/callback`; 
   } else {
     const standardUri = AuthSession.makeRedirectUri();
     console.log('Using redirect URI:', standardUri);
     console.log("Auth0 Client ID:", auth0ClientId);
     console.log("Auth0 Domain:", auth0Domain);
     console.log("Auth0 Audience:", audience);
-
     return standardUri;
   }
 };
@@ -149,82 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // const signOut = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     await deleteItem('auth0_id_token');
-  //     await deleteItem('auth0_access_token');
-  //     await deleteItem('user_data');
   
-  //     const returnTo = Platform.OS === 'web'
-  //       ? 'http://localhost:8081/login'
-  //       : 'myapp://login';
-  
-  //     const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
-
-  
-  //     if (Platform.OS === 'web') {
-  //       // Send user directly to Auth0 logout
-  //       window.location.href = logoutUrl;
-  //     } else {
-  //       console.log('we are int he else lol')
-  //       router.replace('/(auth)/login');
-  //     }
-  
-  //     setUser(null);
-  //     setIsLoggedIn(false);
-
-  //   } catch (err) {
-  //     console.error('[Auth] Sign-out error:', err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-// const signOut = async () => {
-//   try {
-//     console.log('Starting signOut process');
-//     setIsLoading(true);
-
-//     // Set a logout flag
-//     await saveItem('manually_logged_out', 'true');
-    
-//     // Then clear the stored tokens
-//     await Promise.all([
-//       deleteItem('auth0_id_token'),
-//       deleteItem('auth0_access_token'),
-//       deleteItem('user_data')
-//     ]);
-    
-//     // For web, we need to log out of Auth0
-//     if (Platform.OS === 'web') {
-//       const returnTo = window.location.origin + '/login';
-//       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
-//       window.location.href = logoutUrl;
-//     } else {
-//       // For mobile, log out of Auth0 session and then navigate
-//       const returnTo = 'exp://ilredko-alexfan-8081.exp.direct/--/login';
-//       const logoutUrl = `https://${auth0Domain}/v2/logout?client_id=${auth0ClientId}&returnTo=${encodeURIComponent(returnTo)}`;
-      
-//       try {
-//         // Clear the Auth0 session in the browser
-//         await WebBrowser.openAuthSessionAsync(logoutUrl, returnTo);
-//         WebBrowser.maybeCompleteAuthSession();
-//         router.replace('/(auth)/login');
-//       } catch (browserErr) {
-//         console.log('Browser session error:', browserErr);
-//       }
-      
-//     setUser(null);
-//     setIsLoggedIn(false);
-
-//     }
-//   } catch (err) {
-//     console.error('[Auth] Sign-out error:', err);
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
 const signOut = async () => {
   try {
     console.log('Starting signOut process');

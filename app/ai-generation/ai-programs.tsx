@@ -46,17 +46,37 @@ export default function AIWorkoutGenerator() {
     const [equipment, setEquipment] = useState('');
 
     const validateForm = () => {
+        let errorTitle = '';
+        let errorMessage = '';
+        
         if (!height || !weight || !age || !gender || !fitnessLevel || !fitnessGoals || !workoutFrequency) {
-            Alert.alert('Missing Information', 'Please fill in all required fields.');
+            errorTitle = 'Missing Information';
+            errorMessage = 'Please fill in all required fields.';
+        } else if (isNaN(Number(height)) || isNaN(Number(weight)) || isNaN(Number(age)) || isNaN(Number(workoutFrequency))) {
+            errorTitle = 'Invalid Input';
+            errorMessage = 'Height, weight, age, and workout frequency must be numbers.';
+        }
+        if (errorMessage) {
+            if (Platform.OS === 'web') {
+                //web
+                window.alert(errorTitle + ': ' + errorMessage);
+            } else {
+                //mobile
+                Alert.alert(errorTitle, errorMessage);
+            }
             return false;
         }
-
-        if (isNaN(Number(height)) || isNaN(Number(weight)) || isNaN(Number(age)) || isNaN(Number(workoutFrequency))) {
-            Alert.alert('Invalid Input', 'Height, weight, age, and workout frequency must be numbers.');
-            return false;
-        }
-
         return true;
+    };
+
+    const navigateToProgram = (planId: string | number) => {
+        if (Platform.OS === 'web') {
+            // For web, immediately redirect
+            window.location.href = `/meal-plans/${planId}`;
+        } else {
+            // For mobile, use the router
+            router.push(`/meal-plans/${planId}`);
+        }
     };
 
     //form submission
@@ -97,17 +117,23 @@ export default function AIWorkoutGenerator() {
             console.log('AI workout program response:', response.data);
 
             //check if plan was generated and saved successfully
-            if (response.data && response.data.program_id) {
-                Alert.alert(
-                    'Success!',
-                    `Your workout program "${response.data.program_name}" has been generated.`,
-                    [
-                        {
-                            text: 'View Plan',
-                            onPress: () => router.push(`/programs/${response.data.program_id}`)
-                        }
-                    ]
-                );
+            if (response.data && response.data.meal_plan_id) {
+                if (Platform.OS === 'web') {
+                    // On web, redirect immediately
+                    navigateToProgram(response.data.meal_plan_id);
+                } else {
+                    // On mobile, show alert with navigation option
+                    Alert.alert(
+                        'Success!',
+                        `Your meal plan "${response.data.meal_plan_name}" has been generated.`,
+                        [
+                            {
+                                text: 'View Plan',
+                                onPress: () => navigateToProgram(response.data.meal_plan_id)
+                            }
+                        ]
+                    );
+                }
             } else if (response.data && response.data.rawResponse) {
                 Alert.alert(
                     'Plan Generated but Not Saved',
