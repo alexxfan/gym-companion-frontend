@@ -4,6 +4,11 @@ This is the **frontend** of the Gym Companion App — a cross platform fitness a
 
 ---
 
+## Project Details Website
+
+[https://alexxfan.github.io/](https://alexxfan.github.io/)
+
+
 ## Live Web Version
 
 [https://gym-companion.expo.app](https://gym-companion.expo.app)
