@@ -99,7 +99,7 @@ export default function SessionHistoryScreen() {
 
       <TextInput
         style={styles.searchInput}
-        placeholder="Filter by date (e.g. 4/25/2025)"
+        placeholder="Filter by date (e.g. 25/4/2025)"
         value={searchDate}
         onChangeText={filterSessions}
       />
