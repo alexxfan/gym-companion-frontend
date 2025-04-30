@@ -27,9 +27,9 @@ export default function HomeScreen() {
     "Track your progress to stay motivated and accountable.",
     "Take rest days seriously — recovery is part of training too!",
   ];
-  const today = new Date();
-  const tipIndex = today.getDate() % tips.length;
-  const dailyTip = tips[tipIndex];  //get a tip based on the day of the month
+  const today = new Date(); //get today date
+  const tipIndex = today.getDate() % tips.length; //use modulo, get remainder of date divided by number of tips
+  const dailyTip = tips[tipIndex];  //give daily tip based on index
 
   useEffect(() => {
     //only redirect if not loading AND not logged in
