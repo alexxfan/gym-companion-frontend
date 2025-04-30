@@ -75,7 +75,7 @@ export default function AIMealGenerator() {
             window.location.href = `/meal-plans/${planId}`;
         } else {
             // For mobile, use the router
-            router.push(`/meal-plans/${planId}`);
+            router.push(`/meal-plans/${String(planId)}`);
         }
     };
 
@@ -124,7 +124,7 @@ export default function AIMealGenerator() {
                     // On mobile, show alert with navigation option
                     Alert.alert(
                         'Success!',
-                        `Your meal plan "${response.data.meal_plan_name}" has been generated.`,
+                        `Your meal plan has been generated.`,
                         [
                             {
                                 text: 'View Plan',

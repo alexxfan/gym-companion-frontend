@@ -72,10 +72,11 @@ export default function AIWorkoutGenerator() {
     const navigateToProgram = (planId: string | number) => {
         if (Platform.OS === 'web') {
             // For web, immediately redirect
-            window.location.href = `/meal-plans/${planId}`;
+            window.location.href = `/programs/${planId}`;
         } else {
             // For mobile, use the router
-            router.push(`/meal-plans/${planId}`);
+            router.push(`/programs/${String(planId)}`);
+
         }
     };
 
@@ -117,19 +118,19 @@ export default function AIWorkoutGenerator() {
             console.log('AI workout program response:', response.data);
 
             //check if plan was generated and saved successfully
-            if (response.data && response.data.meal_plan_id) {
+            if (response.data && response.data.program_id) {
                 if (Platform.OS === 'web') {
                     // On web, redirect immediately
-                    navigateToProgram(response.data.meal_plan_id);
+                    navigateToProgram(response.data.program_id);
                 } else {
                     // On mobile, show alert with navigation option
                     Alert.alert(
                         'Success!',
-                        `Your meal plan "${response.data.meal_plan_name}" has been generated.`,
+                        `Your workout program has been generated.`,
                         [
                             {
                                 text: 'View Plan',
-                                onPress: () => navigateToProgram(response.data.meal_plan_id)
+                                onPress: () => navigateToProgram(response.data.program_id)
                             }
                         ]
                     );
