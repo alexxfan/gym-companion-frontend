@@ -247,7 +247,7 @@ export default function SessionDetailScreen() {
         <View style={styles.dateContainer}>
           <MaterialIcons name="event" size={16} color="#666" />
           <Text style={styles.date}>
-            {new Date(session.date).toLocaleString()}
+            {new Date(session.date).toLocaleDateString('en-GB')}
           </Text>
         </View>
       </View>

@@ -18,6 +18,19 @@ export default function HomeScreen() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
+  const tips = [
+    "Stay hydrated! Aim to consume at least 2 litres of water a day.",
+    "Consistent workouts are more effective than occasional, intense sessions. Aim for regular exercise!",
+    "Eat a balanced diet rich in whole foods and protein.",
+    "Get at least 7–8 hours of sleep for optimal recovery.",
+    "Warm up properly to prevent injury and improve performance.",
+    "Track your progress to stay motivated and accountable.",
+    "Take rest days seriously — recovery is part of training too!",
+  ];
+  const today = new Date();
+  const tipIndex = today.getDate() % tips.length;
+  const dailyTip = tips[tipIndex];  //get a tip based on the day of the month
+
   useEffect(() => {
     //only redirect if not loading AND not logged in
     if (!isLoading && !isLoggedIn) {
@@ -242,22 +255,15 @@ export default function HomeScreen() {
         )}
       </View>
       
-      {/*Tips (filler)*/}
+      {/*tips*/}
       <View style={styles.tipsSection}>
-        <Text style={styles.tipsTitle}>Fitness Tips</Text>
+        <Text style={styles.tipsTitle}>Fitness Tip of the Day</Text>
         <View style={styles.tipCard}>
           <MaterialIcons name="lightbulb" size={24} color="#FFC107" style={styles.tipIcon} />
-          <Text style={styles.tipText}>
-            Stay hydrated! Aim to consume at least 2 litres of water a day.
-          </Text>
-        </View>
-        <View style={styles.tipCard}>
-          <MaterialIcons name="lightbulb" size={24} color="#FFC107" style={styles.tipIcon} />
-          <Text style={styles.tipText}>
-            Consistent workouts are more effective than occasional intense sessions. Aim for regular exercise!
-          </Text>
+          <Text style={styles.tipText}>{dailyTip}</Text>
         </View>
       </View>
+
     </ScrollView>
   );
 }
