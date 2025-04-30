@@ -213,6 +213,7 @@ export default function AIMealGenerator() {
                                 >
                                     <Picker.Item label="Male" value="male" />
                                     <Picker.Item label="Female" value="female" />
+                                    <Picker.Item label="Other" value="other" />
                                 </Picker>
                             </View>
                         ) : (
@@ -224,6 +225,7 @@ export default function AIMealGenerator() {
                             >
                                 <Picker.Item label="Male" value="male" />
                                 <Picker.Item label="Female" value="female" />
+                                <Picker.Item label="other" value="other" />
                             </Picker>
                         )}
                     </View>
@@ -315,7 +317,7 @@ export default function AIMealGenerator() {
                     {isGenerating ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#179ea0" />
-                            <Text style={styles.loadingText}>Generating your personalized meal plan...</Text>
+                            <Text style={styles.loadingText}>Generating your personalised meal plan...</Text>
                             <Text style={styles.noteText}>This may take a minute or two.</Text>
                         </View>
                     ) : (

@@ -89,7 +89,7 @@ export default function HomeScreen() {
           <MaterialIcons name="auto-awesome" size={36} color="#fff" style={styles.aiIcon} />
           <View style={styles.aiTextContainer}>
             <Text style={styles.aiTitle}>AI Training Assistant</Text>
-            <Text style={styles.aiDescription}>Create personalized workout & meal plans</Text>
+            <Text style={styles.aiDescription}>Create personalised workout & meal plans</Text>
           </View>
         </View>
         <MaterialIcons name="chevron-right" size={28} color="#fff" />

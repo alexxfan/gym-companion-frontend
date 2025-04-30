@@ -12,7 +12,7 @@ export default function AIGeneratorScreen() {
         <MaterialIcons name="auto-awesome" size={60} color="#435465" />
         <Text style={styles.title}>AI Training Assistant</Text>
         <Text style={styles.subtitle}>
-          Generate personalized workout and meal plans powered by AI
+          Generate personalised workout and meal plans powered by AI
         </Text>
       </View>
 
@@ -27,7 +27,7 @@ export default function AIGeneratorScreen() {
             <View style={styles.cardTextContainer}>
               <Text style={styles.cardTitle}>Workout Program</Text>
               <Text style={styles.cardDescription}>
-                Create a personalized workout program based on your fitness level and goals
+                Create a personalised workout program based on your fitness level and goals
               </Text>
             </View>
           </View>
@@ -61,7 +61,7 @@ export default function AIGeneratorScreen() {
       <View style={styles.infoContainer}>
         <MaterialIcons name="info-outline" size={24} color="#666" style={styles.infoIcon} />
         <Text style={styles.infoText}>
-          Our AI assistant creates personalized plans based on your information. The generated plans will be saved to your account and can be accessed anytime.
+          Our AI assistant creates personalised plans based on your information. The generated plans will be saved to your account and can be accessed anytime.
         </Text>
       </View>
 
