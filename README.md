@@ -1,50 +1,31 @@
-# Welcome to your Expo app 👋
+# Gym Companion App – Frontend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is the **frontend** of the Gym Companion App — a cross platform fitness ap that uses **AI-generated workout and meal plans**, built with **React Native**, **Expo** and **TypeScript**.
 
-## Get started
+---
 
-1. Install dependencies
+## Live Web Version
 
-   ```bash
-   npm install
-   ```
+[https://gym-companion.expo.app](https://gym-companion.expo.app)
 
-2. Start the app
+> **Note:** If using the web version, you must disable pop-up blockers. This is primarily an issue on **Safari**, but may affect other browsers as well. The mobile app is the primary experience.
 
-   ```bash
-    npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Features
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **AI-Generated Plans** – Personalised workouts and meals via OpenAI API  
+- **Progress Tracking** – Log sessions and track workout history  
+- **Cross Platform** – Built with Expo React Native for iOS, Android and Web  
+- **Secure Auth** – Auth0 login system  
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+- **React Native (Expo)** – Cross platform mobile and web support  
+- **Auth0** – Secure user authentication   
+- **REST API** – Communicates with Node.js/Express backend  
+- **OpenAI API** – Used for generating plans based on user input  
 
-```bash
-npm run reset-project
-```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
