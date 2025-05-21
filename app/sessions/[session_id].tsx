@@ -61,8 +61,19 @@ export default function SessionDetailScreen() {
       const response = await API.get(`/api/session/${sessionId}`);
       
       if (response.data) {
-        setSession(response.data);
-        console.log('Session loaded successfully:', response.data);
+        // Ensure exercises is at least an empty array if it's null
+        const sessionData = {
+          ...response.data,
+          exercises: response.data.exercises || []
+        };
+        setSession(sessionData);
+        console.log('Session loaded successfully:', sessionData);
+        
+        // Check if there are no exercises and show a warning
+        if (!response.data.exercises || response.data.exercises.length === 0) {
+          console.warn('Session has no exercises');
+          setError('This session has no exercises. This may be due to starting a workout with no exercises.');
+        }
       } else {
         setError('Failed to load session data');
         console.error('API returned empty data');
@@ -237,6 +248,9 @@ export default function SessionDetailScreen() {
     );
   }
   
+  // Handle case where session exists but has no exercises
+  const hasExercises = session.exercises && session.exercises.length > 0;
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -275,68 +289,75 @@ export default function SessionDetailScreen() {
       
       <Text style={styles.sectionTitle}>Exercises</Text>
       
-      {session.exercises.map((exercise) => (
-        <View
-          key={exercise.log_id}
-          style={[
-            styles.exerciseCard,
-            exercise.completed ? styles.completedExercise : {},
-          ]}
-        >
-          <View style={styles.exerciseHeader}>
-            <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
-            <View style={styles.switchContainer}>
-              {updating[exercise.log_id] ? (
-                <ActivityIndicator size="small" color="#34788c" />
-              ) : (
-                <Switch
-                  value={exercise.completed}
-                  onValueChange={(value) =>
-                    handleCompletionToggle(exercise.log_id, value)
-                  }
-                  trackColor={{ false: '#d1d1d1', true: '#aed3e3' }}
-                  thumbColor={exercise.completed ? '#34788c' : '#f4f3f4'}
-                />
-              )}
-            </View>
-          </View>
-
-          <View style={styles.exerciseDetails}>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Sets:</Text>
-              <EditableValue
-                label="Sets"
-                value={exercise.sets}
-                onSubmit={(val) => handleUpdateSets(exercise.log_id, val)}
-              />
-            </View>
-
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Reps:</Text>
-              <EditableValue
-                label="Reps"
-                value={exercise.reps}
-                onSubmit={(val) => handleUpdateReps(exercise.log_id, val)}
-              />
-            </View>
-
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Weight:</Text>
-              <EditableValue
-                label="Weight"
-                value={exercise.weight}
-                onSubmit={(val) => handleUpdateWeight(exercise.log_id, val)}
-              />
-            </View>
-          </View>
+      {!hasExercises ? (
+        <View style={styles.emptyExercisesContainer}>
+          <Text style={styles.emptyExercisesText}>
+            This session has no exercises. This may be due to starting a workout with no exercises.
+          </Text>
         </View>
-      ))}
+      ) : (
+        session.exercises.map((exercise) => (
+          <View
+            key={exercise.log_id}
+            style={[
+              styles.exerciseCard,
+              exercise.completed ? styles.completedExercise : {},
+            ]}
+          >
+            <View style={styles.exerciseHeader}>
+              <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
+              <View style={styles.switchContainer}>
+                {updating[exercise.log_id] ? (
+                  <ActivityIndicator size="small" color="#34788c" />
+                ) : (
+                  <Switch
+                    value={exercise.completed}
+                    onValueChange={(value) =>
+                      handleCompletionToggle(exercise.log_id, value)
+                    }
+                    trackColor={{ false: '#d1d1d1', true: '#aed3e3' }}
+                    thumbColor={exercise.completed ? '#34788c' : '#f4f3f4'}
+                  />
+                )}
+              </View>
+            </View>
 
+            <View style={styles.exerciseDetails}>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Sets:</Text>
+                <EditableValue
+                  label="Sets"
+                  value={exercise.sets}
+                  onSubmit={(val) => handleUpdateSets(exercise.log_id, val)}
+                />
+              </View>
+
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Reps:</Text>
+                <EditableValue
+                  label="Reps"
+                  value={exercise.reps}
+                  onSubmit={(val) => handleUpdateReps(exercise.log_id, val)}
+                />
+              </View>
+
+              <View style={styles.detailItem}>
+                <Text style={styles.detailLabel}>Weight:</Text>
+                <EditableValue
+                  label="Weight"
+                  value={exercise.weight}
+                  onSubmit={(val) => handleUpdateWeight(exercise.log_id, val)}
+                />
+              </View>
+            </View>
+          </View>
+        ))
+      )}
       
       <TouchableOpacity
         style={styles.finishButton}
         onPress={() => {
-          if (progressPercentage === 100) {
+          if (progressPercentage === 100 || !hasExercises) {
             router.replace('/sessions/history');
           } else {
             if (Platform.OS === 'web') {
@@ -368,7 +389,7 @@ export default function SessionDetailScreen() {
         }}
       >
         <Text style={styles.finishButtonText}>
-          {progressPercentage === 100 ? 'Complete Workout' : 'Finish Workout'}
+          {progressPercentage === 100 || !hasExercises ? 'Complete Workout' : 'Finish Workout'}
         </Text>
       </TouchableOpacity>
 
@@ -463,6 +484,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 16,
     color: '#333',
+  },
+  emptyExercisesContainer: {
+    backgroundColor: '#fef8f6',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+    borderLeftColor: '#e74c3c',
+  },
+  emptyExercisesText: {
+    color: '#666',
+    fontSize: 14,
+    lineHeight: 20,
   },
   exerciseCard: {
     backgroundColor: '#f8f9fa',

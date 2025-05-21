@@ -236,7 +236,7 @@ export default function AIMealGenerator() {
                     <Text style={styles.label}>Fitness Goals (comma-separated)</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="e.g., weight loss, muscle gain, maintenance"
+                        placeholder="e.g., weight loss, muscle gain, etc."
                         value={fitnessGoals}
                         onChangeText={setFitnessGoals}
                         editable={!isGenerating}

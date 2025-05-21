@@ -8,6 +8,8 @@ import {
   Workout 
 } from '@/lib/workoutService';
 import API from '@/lib/api';
+import { Platform } from 'react-native';
+
 
 
 export default function WorkoutDetailScreen() {
@@ -64,6 +66,41 @@ export default function WorkoutDetailScreen() {
       setIsDeleting(false);
       setShowConfirmDelete(false);
       Alert.alert('Error', 'Failed to delete workout');
+    }
+  };
+  
+  const handleStartWorkout = async () => {
+    if (exercises.length === 0) {
+      const message = 'You cannot start a workout with no exercises. Please add at least one exercise first.';
+
+      if (Platform.OS === 'web') {
+        window.alert(message);
+      } else {
+        Alert.alert('Cannot Start Workout', message, [{ text: 'OK' }]);
+      }
+
+      return;
+    }
+
+    try {
+      const response = await API.post(`/api/session/start/${programId}/${workoutId}`, {
+        date: new Date().toISOString(),
+        notes: ''
+      });
+
+      if (response.data?.session_id) {
+        router.replace(`/programs/${programId}/workouts/${workoutId}/start-session`);
+      } else {
+        throw new Error('Invalid session response');
+      }
+    } catch (err) {
+      console.error('Failed to start session:', err);
+
+      if (Platform.OS === 'web') {
+        window.alert('Could not start workout session');
+      } else {
+        Alert.alert('Error', 'Could not start workout session');
+      }
     }
   };
   
@@ -182,23 +219,7 @@ export default function WorkoutDetailScreen() {
   
           <TouchableOpacity
             style={styles.startButton}
-            onPress={async () => {
-              try {
-                const response = await API.post(`/api/session/start/${programId}/${workoutId}`, {
-                  date: new Date().toISOString(),
-                  notes: ''
-                });
-  
-                if (response.data?.session_id) {
-                  router.replace(`/sessions/${response.data.session_id}`);
-                } else {
-                  throw new Error('Invalid session response');
-                }
-              } catch (err) {
-                console.error('Failed to start session:', err);
-                Alert.alert('Error', 'Could not start workout session');
-              }
-            }}
+            onPress={handleStartWorkout}
           >
             <Text style={styles.startButtonText}>Start This Workout</Text>
           </TouchableOpacity>
